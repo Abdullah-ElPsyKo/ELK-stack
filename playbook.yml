@@ -1,0 +1,11 @@
+- hosts: siem
+  become: yes
+  roles:
+    - elasticsearch
+    - logstash
+    - kibana
+
+- hosts: filebeat_clients
+  become: yes
+  roles:
+    - filebeat
