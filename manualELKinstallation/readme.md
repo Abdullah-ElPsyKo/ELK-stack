@@ -7,6 +7,12 @@ This guide provides step-by-step instructions for installing the ELK (Elasticsea
 - sudo privileges
 - DNF package manager
 
+---
+
+Note: Whenever you enable a service, make sure to open the necessary ports in the firewall to allow proper communication.
+
+---
+
 ## 1. Elasticsearch Installation
 
 ### 1.1 Import the Elastic GPG Key
@@ -44,6 +50,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable elasticsearch.service
 sudo systemctl start elasticsearch.service
 ```
+---
 
 ## 2. Kibana Installation
 
@@ -82,8 +89,9 @@ sudo systemctl daemon-reload
 sudo systemctl enable kibana.service
 sudo systemctl start kibana.service
 ```
+---
 
-## 3. Logstash Installation
+## 3. Logstash Installation (For advanced log parsing etc.)
 
 ### 3.1 Create Logstash Repository
 Create `/etc/yum.repos.d/logstash.repo` with the following content:
@@ -140,3 +148,58 @@ tail -f /var/log/logstash/*.log
 - Replace `192.168.1.31` with your Elasticsearch host IP
 - Always change default passwords for security
 - SSL certificate verification is disabled in this example; consider proper SSL setup for production environments
+
+---
+
+## **4. Adding an Agent**
+To log system activity directly to Kibana (without Logstash), we use **Fleet Server** to enroll agents and manage them centrally.
+
+### **Steps to Add an Agent:**
+1. **Create a Fleet Server** (if not already set up).
+2. **Go to "Agent Policies"** in Kibana and **create a new agent policy**.
+3. **Select the policy**, then **add an integration**.
+   - For Linux logs, add **System Integration** (captures system logs, processes, authentication, sudo commands, etc.).
+4. **Go to "Agents" > Click "Add Agent"**.
+   - Choose **Enroll in Fleet**.
+   - Pick the agent policy you created.
+   - Run the given **installation command** on the target machine.
+5. **Verify Agent Enrollment**:
+   - The agent should now appear as **Healthy** in the Fleet section.
+
+---
+
+## **5. Checking Data in Kibana**
+After enrolling an agent, you can **view logs and security events**.
+
+### **Discover Section**
+1. **Go to "Discover" in Kibana**.
+2. **Select the correct Data View:**  
+   - Use **"logs-*"** for general logs.
+   - Use **"metrics-*"** for system performance data.
+3. **Add Relevant Columns**:
+   - `@timestamp` → Time of event
+   - `process.name` → Name of executed process
+   - `process.command_line` → Full command executed
+   - `user.name` → User running the command
+   - `source.ip` → IP of login attempts
+   - `system.auth.sudo.command` → Logs of sudo commands
+
+💡 **Example Output:**
+- Here is an example of **some relevant logs (sudo commands, SSH-login attempts)**:
+  ![alt text](../readme/sshAttackDashboard.png)
+
+---
+
+### **Dashboards for Visualization**
+For better insights, you can **create dashboards** or use built-in ones.
+
+1. **Go to "Dashboards" in Kibana**.
+2. **Search for pre-built dashboards**, or create a custom one.
+3. **Example: Failed SSH Login Attempts**
+   - Shows attackers attempting to access the system.
+   - Uses `system.auth.ssh.event` logs to track failed logins.
+   - IP sources mapped on **Elastic Maps**.
+
+💡 **Example SSH Attack Dashboard:**
+  ![alt text](../readme/sshAttackDashboard.png)
+
