@@ -1,6 +1,6 @@
 # ELK Stack Installation Guide
 
-This guide provides step-by-step instructions for installing the ELK (Elasticsearch, Logstash, Kibana) Stack on RHEL/CentOS systems.
+This guide provides step-by-step instructions for installing the ELK (Elasticsearch, Logstash, Kibana) Stack on RHEL/CentOS systems. **NOT MEANT FOR PRODUCTION**
 
 ## Prerequisites
 - RHEL/CentOS-based system
